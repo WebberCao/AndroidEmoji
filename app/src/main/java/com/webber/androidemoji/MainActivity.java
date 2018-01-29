@@ -8,11 +8,12 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.webber.androidemoji.adapter.ContentRecyclerviewAdapter;
 import com.webber.androidemoji.fragment.EmojiFragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView rv_text;
+    private RecyclerView rv_tontent;
     private TextView tv_content;
     private FrameLayout fl_emoji;
     private EmojiFragment emojiFragment;
@@ -22,19 +23,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-
         initData();
     }
 
     private void initView() {
-        //rv_text = (RecyclerView) findViewById(R.id.rv_text);
-        tv_content = (TextView) findViewById(R.id.tv_content);
+        rv_tontent = (RecyclerView) findViewById(R.id.rv_tontent);
+//        tv_content = (TextView) findViewById(R.id.tv_content);
         fl_emoji = (FrameLayout) findViewById(R.id.fl_emoji);
     }
 
     private void initData() {
         emojiFragment = EmojiFragment.newInstance(EmojiFragment.class,null);
-        emojiFragment.bindToContentView(tv_content);
+        emojiFragment.bindToContentView(rv_tontent);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.fl_emoji,emojiFragment);
         fragmentTransaction.commit();

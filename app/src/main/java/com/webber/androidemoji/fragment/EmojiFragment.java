@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.webber.androidemoji.R;
+import com.webber.androidemoji.adapter.ContentRecyclerviewAdapter;
 import com.webber.androidemoji.adapter.HorizontalRecyclerviewAdapter;
 import com.webber.androidemoji.adapter.NoHorizontalScrollerVPAdapter;
 import com.webber.androidemoji.model.ImageModel;
@@ -49,6 +51,9 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
     private EmotionKeyboard mEmotionKeyboard;
     private GlobalOnItemClickManagerUtil globalOnItemClickManager;
     private SharedPreferences sp;
+    private List<String> data = new ArrayList<>();
+    private ContentRecyclerviewAdapter contentRecyclerviewAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Nullable
     @Override
@@ -95,10 +100,14 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_send:
-                Log.d(TAG, "onClick: " + mEdtContent.getText().toString());
-
-                ((TextView) contentView).setText(SpanStringUtil.getEmotionContent(EmotionUtil.EMOTION_CLASSIC_TYPE,
-                        getActivity(), ((TextView) contentView), mEdtContent.getText().toString()));
+                if(contentRecyclerviewAdapter == null){
+                    contentRecyclerviewAdapter = new ContentRecyclerviewAdapter(getContext(),data);
+                    mLayoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false);
+                    ((RecyclerView)contentView).setLayoutManager(mLayoutManager);
+                    ((RecyclerView)contentView).setAdapter(contentRecyclerviewAdapter);
+                }
+                data.add(mEdtContent.getText().toString());
+                contentRecyclerviewAdapter.notifyDataSetChanged();
                 mEdtContent.setText("");
                 break;
         }

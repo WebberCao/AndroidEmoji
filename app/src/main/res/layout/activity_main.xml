@@ -7,13 +7,14 @@
     android:orientation="vertical"
     tools:context="com.webber.androidemoji.MainActivity">
 
-<!--    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_text"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_tontent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_margin="10dp"
         android:layout_weight="1">
-    </android.support.v7.widget.RecyclerView> -->
-    <TextView
+    </android.support.v7.widget.RecyclerView>
+<!--    <TextView
         android:id="@+id/tv_content"
         android:text="内容"
         android:textSize="26sp"
@@ -22,7 +23,7 @@
         android:layout_margin="10dp"
         android:layout_weight="1"
         android:focusable="true"
-        android:gravity="top" />
+        android:gravity="top" />-->
 
     <FrameLayout
         android:id="@+id/fl_emoji"
