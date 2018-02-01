@@ -16,11 +16,14 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.webber.androidemoji.R;
 import com.webber.androidemoji.adapter.ContentRecyclerviewAdapter;
 import com.webber.androidemoji.adapter.HorizontalRecyclerviewAdapter;
 import com.webber.androidemoji.adapter.NoHorizontalScrollerVPAdapter;
 import com.webber.androidemoji.model.ImageModel;
+import com.webber.androidemoji.model.ItemBean;
+import com.webber.androidemoji.model.ItemModel;
 import com.webber.androidemoji.utils.EmotionUtil;
 import com.webber.androidemoji.utils.GlobalOnItemClickManagerUtil;
 import com.webber.androidemoji.utils.SpanStringUtil;
@@ -51,7 +54,7 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
     private EmotionKeyboard mEmotionKeyboard;
     private GlobalOnItemClickManagerUtil globalOnItemClickManager;
     private SharedPreferences sp;
-    private List<String> data = new ArrayList<>();
+    private List<ItemModel> data = new ArrayList<>();
     private ContentRecyclerviewAdapter contentRecyclerviewAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -101,13 +104,17 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.btn_send:
                 if(contentRecyclerviewAdapter == null){
-                    contentRecyclerviewAdapter = new ContentRecyclerviewAdapter(getContext(),data);
+                    contentRecyclerviewAdapter = new ContentRecyclerviewAdapter(getContext(),R.layout.item_content,0, data);
                     mLayoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false);
                     ((RecyclerView)contentView).setLayoutManager(mLayoutManager);
                     ((RecyclerView)contentView).setAdapter(contentRecyclerviewAdapter);
                 }
-                data.add(mEdtContent.getText().toString());
+                ItemBean itemBean = new ItemBean(1,mEdtContent.getText().toString());
+                ItemModel itemModel = new ItemModel(itemBean);
+                data.add(itemModel);
                 contentRecyclerviewAdapter.notifyDataSetChanged();
+                contentRecyclerviewAdapter.openLoadAnimation(BaseQuickAdapter.SCALEIN);
+                ((RecyclerView)contentView).smoothScrollToPosition(data.size()-1);
                 mEdtContent.setText("");
                 break;
         }
