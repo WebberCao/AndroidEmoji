@@ -25,7 +25,6 @@ import java.util.List;
 
 public class ContentRecyclerviewAdapter extends BaseSectionQuickAdapter<ItemModel,BaseViewHolder> {
 
-    private List<String> datas;
     private Context context;
 
     public ContentRecyclerviewAdapter(Context context, int layoutResId, int layoutHeadResId, List<ItemModel> datas){
@@ -35,7 +34,6 @@ public class ContentRecyclerviewAdapter extends BaseSectionQuickAdapter<ItemMode
 
     @Override
     protected void convertHead(BaseViewHolder helper, ItemModel item) {
-
     }
 
     @Override
