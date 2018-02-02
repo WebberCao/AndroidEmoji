@@ -15,6 +15,7 @@
            android:id="@+id/image_portrait_r" 
            android:layout_width="40dp"
            android:layout_height="40dp"
+           android:layout_centerVertical="true"
            android:scaleType="centerCrop"
            android:src="@drawable/myphoto"
            android:layout_alignParentRight="true"/>
@@ -36,7 +37,7 @@
            android:layout_marginRight="5dp"
            android:layout_below="@id/textview_name_r"
            android:layout_toLeftOf="@id/image_portrait_r"
-           android:background="@drawable/outgoing">
+           android:background="@drawable/chat_to_bg_normal">
            <TextView
 		       android:id="@+id/textview_content_r"
 		       android:layout_width="wrap_content"
