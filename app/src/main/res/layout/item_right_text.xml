@@ -13,9 +13,8 @@
        
        <ImageView
            android:id="@+id/image_portrait_r" 
-           android:layout_width="40dp"
-           android:layout_height="40dp"
-           android:layout_centerVertical="true"
+           android:layout_width="42dp"
+           android:layout_height="42dp"
            android:scaleType="centerCrop"
            android:src="@drawable/myphoto"
            android:layout_alignParentRight="true"/>
@@ -37,13 +36,14 @@
            android:layout_marginRight="5dp"
            android:layout_below="@id/textview_name_r"
            android:layout_toLeftOf="@id/image_portrait_r"
-           android:background="@drawable/chat_to_bg_normal">
+           android:background="@drawable/chat_gb">
            <TextView
 		       android:id="@+id/textview_content_r"
 		       android:layout_width="wrap_content"
 		       android:layout_height="wrap_content"
+               android:paddingTop="2dp"
+               android:paddingLeft="2dp"
 		       android:textSize="18dp"
-		       android:layout_gravity="center_horizontal"
 		       android:textColor="#000000"/>
        </RelativeLayout>
        
