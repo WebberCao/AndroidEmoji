@@ -128,14 +128,6 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
                 ((RecyclerView)contentView).smoothScrollToPosition(data.size()-1);
                 mEdtContent.setText("");
                 break;
-            case R.id.chk_voice:
-                if(chk_voice.isChecked()){
-                    hideKeyboard();
-                    btn_voice.setVisibility(View.VISIBLE);
-                }else {
-                    btn_voice.setVisibility(View.INVISIBLE);
-                }
-                break;
         }
     }
 
@@ -152,6 +144,7 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     }
 
     private void voiceTouch(MotionEvent event) {
+
         //btn_voice.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
     }
 

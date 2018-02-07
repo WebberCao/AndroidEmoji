@@ -41,7 +41,7 @@
                 android:id="@+id/btn_voice"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/shape_bg_edittext"
+                android:background="@drawable/voice_bg_button"
                 android:visibility="invisible"
                 android:text="按住 说话"/>
         </RelativeLayout>

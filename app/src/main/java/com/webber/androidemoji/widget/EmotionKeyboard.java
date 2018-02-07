@@ -103,7 +103,9 @@ public class EmotionKeyboard {
         mEmotionCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mVoiceCheckBox.setChecked(false);
                 if(mVoiceBotton.isShown()){
+                    mEditText.setVisibility(View.VISIBLE);
                     mVoiceBotton.setVisibility(View.INVISIBLE);
                 }
                 if (mEmotionLayout.isShown()) {
