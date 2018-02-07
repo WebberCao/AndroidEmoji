@@ -1,5 +1,6 @@
 package com.webber.androidemoji.fragment;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,11 +14,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -63,6 +66,8 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     private List<ItemModel> data = new ArrayList<>();
     private ContentRecyclerviewAdapter contentRecyclerviewAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private Dialog voiceDialog;
+    private ImageView voiceImage;
 
     @Nullable
     @Override
@@ -144,8 +149,41 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     }
 
     private void voiceTouch(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                btn_voice.setText("松开 发送");
+                btn_voice.setBackgroundResource(R.drawable.voice_bg_button_pressed);
+                showVoiceDialog();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (voiceDialog.isShowing()) {
+                    voiceDialog.dismiss();
+                }
+                btn_voice.setText("按住 说话");
+                btn_voice.setBackgroundResource(R.drawable.voice_bg_button_nomal);
+                break;
+            case MotionEvent.ACTION_UP:
+                if (voiceDialog.isShowing()) {
+                    voiceDialog.dismiss();
+                }
+                btn_voice.setText("按住 说话");
+                btn_voice.setBackgroundResource(R.drawable.voice_bg_button_nomal);
+                break;
 
-        //btn_voice.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        }
+    }
+
+    void showVoiceDialog() {
+        voiceDialog = new Dialog(getActivity(), R.style.VoiceDialogStyle);
+        voiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        voiceDialog.getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        voiceDialog.setContentView(R.layout.voice_dialog);
+        voiceImage = (ImageView) voiceDialog.findViewById(R.id.dialog_img);
+        voiceDialog.show();
     }
 
     /**
