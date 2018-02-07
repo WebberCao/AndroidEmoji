@@ -12,6 +12,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -25,7 +27,10 @@ public class EmotionKeyboard {
     private InputMethodManager mInputManager;//软键盘管理类
     private SharedPreferences sp;
     private View mEmotionLayout;//表情布局
-    private EditText mEditText;//
+    private EditText mEditText;
+    private CheckBox mEmotionCheckBox;
+    private CheckBox mVoiceCheckBox;
+    private Button mVoiceBotton; //语音按钮
     private View mContentView;//内容布局view,即除了表情布局或者软键盘布局以外的布局，用于固定bar的高度，防止跳闪
 
     private EmotionKeyboard() {
@@ -90,13 +95,17 @@ public class EmotionKeyboard {
     /**
      * 绑定表情按钮
      *
-     * @param emotionButton
+     * @param emotionCheckBox
      * @return
      */
-    public EmotionKeyboard bindToEmotionButton(View emotionButton) {
-        emotionButton.setOnClickListener(new View.OnClickListener() {
+    public EmotionKeyboard bindToEmotionButton(CheckBox emotionCheckBox) {
+        mEmotionCheckBox = emotionCheckBox;
+        mEmotionCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mVoiceBotton.isShown()){
+                    mVoiceBotton.setVisibility(View.INVISIBLE);
+                }
                 if (mEmotionLayout.isShown()) {
                     lockContentHeight();//显示软件盘时，锁定内容高度，防止跳闪。
                     hideEmotionLayout(true);//隐藏表情布局，显示软件盘
@@ -112,6 +121,43 @@ public class EmotionKeyboard {
                 }
             }
         });
+        return this;
+    }
+
+    /**
+     * 绑定语音开关
+     *
+     * @param voiceCheckBox
+     * @return
+     */
+    public EmotionKeyboard bindToVoiceChekBox(CheckBox voiceCheckBox) {
+        mVoiceCheckBox = voiceCheckBox;
+        voiceCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mVoiceCheckBox.isChecked()) {
+                    mEmotionLayout.setVisibility(View.GONE);//隐藏表情布局
+                    hideSoftInput();    //隐藏软键盘
+                    mVoiceBotton.setVisibility(View.VISIBLE);//显示语音按钮
+                    mEditText.setVisibility(View.GONE);
+                } else {
+                    mVoiceBotton.setVisibility(View.INVISIBLE);//隐藏语音按钮
+                    mEditText.setVisibility(View.VISIBLE);
+                }
+                mEmotionCheckBox.setChecked(false);
+            }
+        });
+        return this;
+    }
+
+    /**
+     * 绑定语音按钮
+     *
+     * @param voiceButton
+     * @return
+     */
+    public EmotionKeyboard bindToVoiceButton(Button voiceButton) {
+        mVoiceBotton = (Button) voiceButton;
         return this;
     }
 

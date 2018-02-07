@@ -1,5 +1,6 @@
 package com.webber.androidemoji.fragment;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,8 +10,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -36,11 +40,13 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 
 
-public class EmojiFragment extends BaseFragment implements View.OnClickListener {
+public class EmojiFragment extends BaseFragment implements View.OnClickListener, View.OnTouchListener {
     private static final String TAG = EmojiFragment.class.getSimpleName();
     private CheckBox mCBEmotionBtn;
     private EditText mEdtContent;
     private Button mBtnSend;
+    private Button btn_voice;
+    private CheckBox chk_voice;
     private NoHorizontalScrollerViewPager mNoHorizontalVP;
     //底部水平tab
     private RecyclerView mBottomRecyclerView;
@@ -69,7 +75,9 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
                 .setEmotionView(layout.findViewById(R.id.ll_emoji))//绑定表情面板
                 .bindToContent(contentView)//绑定内容view
                 .bindToEditText(((EditText) layout.findViewById(R.id.et_content)))//判断绑定那种EditView
-                .bindToEmotionButton(layout.findViewById(R.id.chb_emoji))//绑定表情按钮
+                .bindToEmotionButton((CheckBox) layout.findViewById(R.id.chb_emoji))//绑定表情按钮
+                .bindToVoiceChekBox((CheckBox) layout.findViewById(R.id.chk_voice)) //绑定语音checkBox
+                .bindToVoiceButton((Button) layout.findViewById(R.id.btn_voice))//绑定语音 按钮
                 .build();
         initData();
 //        点击表情的全局监听管理类
@@ -90,12 +98,15 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
     }
 
     private void initView(View layout) {
-
         mCBEmotionBtn = ((CheckBox) layout.findViewById(R.id.chb_emoji));
         mEdtContent = ((EditText) layout.findViewById(R.id.et_content));
         mBtnSend = ((Button) layout.findViewById(R.id.btn_send));
         mNoHorizontalVP = ((NoHorizontalScrollerViewPager) layout.findViewById(R.id.vp_emoji));
         mBottomRecyclerView = ((RecyclerView) layout.findViewById(R.id.rv_more));
+        btn_voice = (Button) layout.findViewById(R.id.btn_voice);
+        btn_voice.setOnTouchListener(this);
+        chk_voice = (CheckBox) layout.findViewById(R.id.chk_voice);
+        chk_voice.setOnClickListener(this);
         mBtnSend.setOnClickListener(this);
     }
 
@@ -117,6 +128,41 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener 
                 ((RecyclerView)contentView).smoothScrollToPosition(data.size()-1);
                 mEdtContent.setText("");
                 break;
+            case R.id.chk_voice:
+                if(chk_voice.isChecked()){
+                    hideKeyboard();
+                    btn_voice.setVisibility(View.VISIBLE);
+                }else {
+                    btn_voice.setVisibility(View.INVISIBLE);
+                }
+                break;
+        }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (v.getId()) {
+            case R.id.btn_voice:
+                voiceTouch(event);
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    private void voiceTouch(MotionEvent event) {
+        //btn_voice.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+    }
+
+    /**
+     * 隐藏软键盘
+     */
+    private void hideKeyboard(){
+        InputMethodManager manager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (getActivity().getWindow().getAttributes().softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN) {
+            if (getActivity().getCurrentFocus() != null)
+                manager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
 

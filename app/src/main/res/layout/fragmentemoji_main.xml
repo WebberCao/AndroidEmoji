@@ -24,16 +24,27 @@
             android:button="@null"
             android:layout_marginRight="7dp"
             android:background="@drawable/checkbox_voice_keyboard"/>
-        <EditText
-            android:id="@+id/et_content"
+        <RelativeLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shape_bg_edittext"
-            android:maxLines="3"
-            android:minHeight="36dp"
-            android:textSize="16sp"
+            android:layout_height="35dp"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1"/>
+            android:layout_weight="1">
+            <EditText
+                android:id="@+id/et_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_bg_edittext"
+                android:maxLines="3"
+                android:minHeight="36dp"
+                android:textSize="16sp"/>
+            <Button
+                android:id="@+id/btn_voice"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_bg_edittext"
+                android:visibility="invisible"
+                android:text="按住 说话"/>
+        </RelativeLayout>
 
 
         <CheckBox
