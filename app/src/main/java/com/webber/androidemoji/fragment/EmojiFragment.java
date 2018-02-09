@@ -22,6 +22,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.webber.androidemoji.R;
@@ -68,6 +69,9 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     private RecyclerView.LayoutManager mLayoutManager;
     private Dialog voiceDialog;
     private ImageView voiceImage;
+    private TextView tv_voice;
+    private boolean isSend; //是否发送
+    private float y;
 
     @Nullable
     @Override
@@ -151,11 +155,25 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     private void voiceTouch(MotionEvent event) {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
+                isSend = true;
                 btn_voice.setText("松开 发送");
                 btn_voice.setBackgroundResource(R.drawable.voice_bg_button_pressed);
                 showVoiceDialog();
+                y = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
+                float currentY = event.getY();
+                if(y-currentY>30){
+                    //取消发送
+                    isSend = false;
+                    tv_voice.setText("松开手指，取消发送");
+                    tv_voice.setTextColor(0XFFFF3030);
+                }else {
+                    //取消发送
+                    isSend = true;
+                    tv_voice.setText("手指上划，取消发送");
+                    tv_voice.setTextColor(0XFFFFFFFF);
+                }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (voiceDialog.isShowing()) {
@@ -163,6 +181,10 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
                 }
                 btn_voice.setText("按住 说话");
                 btn_voice.setBackgroundResource(R.drawable.voice_bg_button_nomal);
+                if(isSend){
+                    //发送语音
+                    Toast.makeText(getActivity(),"发送语音",Toast.LENGTH_LONG).show();
+                }
                 break;
             case MotionEvent.ACTION_UP:
                 if (voiceDialog.isShowing()) {
@@ -170,6 +192,10 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
                 }
                 btn_voice.setText("按住 说话");
                 btn_voice.setBackgroundResource(R.drawable.voice_bg_button_nomal);
+                if(isSend){
+                    //发送语音
+                    Toast.makeText(getActivity(),"发送语音",Toast.LENGTH_LONG).show();
+                }
                 break;
 
         }
@@ -183,6 +209,7 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         voiceDialog.setContentView(R.layout.voice_dialog);
         voiceImage = (ImageView) voiceDialog.findViewById(R.id.dialog_img);
+        tv_voice = (TextView) voiceDialog.findViewById(R.id.tv_voice);
         voiceDialog.show();
     }
 
