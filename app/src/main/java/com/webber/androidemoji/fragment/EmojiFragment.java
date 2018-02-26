@@ -4,11 +4,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,19 +35,25 @@ import com.webber.androidemoji.adapter.NoHorizontalScrollerVPAdapter;
 import com.webber.androidemoji.model.ImageModel;
 import com.webber.androidemoji.model.ItemBean;
 import com.webber.androidemoji.model.ItemModel;
+import com.webber.androidemoji.utils.AudioPlayManager;
+import com.webber.androidemoji.utils.AudioRecoderManager;
 import com.webber.androidemoji.utils.EmotionUtil;
 import com.webber.androidemoji.utils.GlobalOnItemClickManagerUtil;
 import com.webber.androidemoji.utils.SpanStringUtil;
+import com.webber.androidemoji.utils.VoiceBubbleListener;
 import com.webber.androidemoji.widget.EmotionKeyboard;
 import com.webber.androidemoji.widget.NoHorizontalScrollerViewPager;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
 
-public class EmojiFragment extends BaseFragment implements View.OnClickListener, View.OnTouchListener {
+public class EmojiFragment extends BaseFragment implements View.OnClickListener, View.OnTouchListener, VoiceBubbleListener {
     private static final String TAG = EmojiFragment.class.getSimpleName();
     private CheckBox mCBEmotionBtn;
     private EditText mEdtContent;
@@ -70,7 +79,11 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     private Dialog voiceDialog;
     private ImageView voiceImage;
     private TextView tv_voice;
+    private double voiceValue;
     private boolean isSend; //是否发送
+    private Thread recordThread;
+    private boolean isRecording = false;
+    private static float recodeTime = 0.0f;
     private float y;
 
     @Nullable
@@ -155,10 +168,18 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
     private void voiceTouch(MotionEvent event) {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
+                AudioPlayManager.getInstance(getContext(), this).stopPlay();
+                isRecording = true;
                 isSend = true;
                 btn_voice.setText("松开 发送");
                 btn_voice.setBackgroundResource(R.drawable.voice_bg_button_pressed);
                 showVoiceDialog();
+                try {
+                    AudioRecoderManager.getInstance(getContext()).start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                startRecordThread();
                 y = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -187,9 +208,30 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (voiceDialog.isShowing()) {
-                    voiceDialog.dismiss();
+                try {
+                    isRecording = false;
+                    if (voiceDialog.isShowing()) {
+                        voiceDialog.dismiss();
+                    }
+                    String voicePath = AudioRecoderManager.getInstance(getContext()).stop();
+                    File file = new File(voicePath);
+                    //将音频保存到字节数组中然后再转成String字符串用于发送
+                    byte[] voicebyte = null;
+                    try {
+                        FileInputStream in = new FileInputStream(file);
+                        voicebyte = new byte[(int) file.length()];
+                        in.read(voicebyte, 0, voicebyte.length);
+                        in.close();
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                    String fileType = voicePath.substring(voicePath.lastIndexOf(".")+1);
+                    String voiceStr = new String(Base64.encode(voicebyte, Base64.DEFAULT));
+                    voiceValue = 0.0;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                AudioRecoderManager.destroy();
                 btn_voice.setText("按住 说话");
                 btn_voice.setBackgroundResource(R.drawable.voice_bg_button_nomal);
                 if(isSend){
@@ -201,7 +243,7 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
         }
     }
 
-    void showVoiceDialog() {
+    private void showVoiceDialog() {
         voiceDialog = new Dialog(getActivity(), R.style.VoiceDialogStyle);
         voiceDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         voiceDialog.getWindow().setFlags(
@@ -211,6 +253,75 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
         voiceImage = (ImageView) voiceDialog.findViewById(R.id.dialog_img);
         tv_voice = (TextView) voiceDialog.findViewById(R.id.tv_voice);
         voiceDialog.show();
+    }
+
+    private void startRecordThread() {
+        recordThread = new Thread(ImgThread);
+        recordThread.start();
+    }
+
+    private Runnable ImgThread = new Runnable() {
+        @Override
+        public void run() {
+            recodeTime = 0.0f;
+            while (isRecording) {
+                try {
+                    Thread.sleep(200);
+                    recodeTime += 0.2;
+                    voiceValue = AudioRecoderManager.getInstance(getContext())
+                            .getAmplitude();
+                    imgHandle.sendEmptyMessage(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        Handler imgHandle = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case 1:
+                        setVoiceImage();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+        };
+    };
+
+    private void setVoiceImage() {
+        if (voiceValue < 200.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_01);
+        } else if (voiceValue > 200.0 && voiceValue < 400) {
+            voiceImage.setImageResource(R.drawable.record_animate_02);
+        } else if (voiceValue > 400.0 && voiceValue < 800) {
+            voiceImage.setImageResource(R.drawable.record_animate_03);
+        } else if (voiceValue > 800.0 && voiceValue < 1600) {
+            voiceImage.setImageResource(R.drawable.record_animate_04);
+        } else if (voiceValue > 1600.0 && voiceValue < 3200) {
+            voiceImage.setImageResource(R.drawable.record_animate_05);
+        } else if (voiceValue > 3200.0 && voiceValue < 5000) {
+            voiceImage.setImageResource(R.drawable.record_animate_06);
+        } else if (voiceValue > 5000.0 && voiceValue < 7000) {
+            voiceImage.setImageResource(R.drawable.record_animate_07);
+        } else if (voiceValue > 7000.0 && voiceValue < 10000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_08);
+        } else if (voiceValue > 10000.0 && voiceValue < 14000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_09);
+        } else if (voiceValue > 14000.0 && voiceValue < 17000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_10);
+        } else if (voiceValue > 17000.0 && voiceValue < 20000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_11);
+        } else if (voiceValue > 20000.0 && voiceValue < 24000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_12);
+        } else if (voiceValue > 24000.0 && voiceValue < 28000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_13);
+        } else if (voiceValue > 28000.0) {
+            voiceImage.setImageResource(R.drawable.record_animate_14);
+        }
     }
 
     /**
@@ -322,4 +433,28 @@ public class EmojiFragment extends BaseFragment implements View.OnClickListener,
         globalOnItemClickManager.unAttachToEditText();
     }
 
+    @Override
+    public void playFail(View messageBubble) {
+
+    }
+
+    @Override
+    public void playStoped(View messageBubble) {
+
+    }
+
+    @Override
+    public void playStart(View messageBubble) {
+
+    }
+
+    @Override
+    public void playDownload(View messageBubble) {
+
+    }
+
+    @Override
+    public void playCompletion(View messageBubble) {
+
+    }
 }
