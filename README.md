@@ -1,2 +1,3 @@
 # AndroidEmoji
 AndroidEmojiKeyboard
+可以输入表情和语音的及时通讯聊天界面的键盘
